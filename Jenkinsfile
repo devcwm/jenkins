@@ -3,11 +3,22 @@ pipeline {
     parameters {
         string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to checkout')
     }
+    options {
+        skipDefaultCheckout() 
+    }
     stages {
         stage('Checkout') {
             steps {
                 script {
-                    echo "${env.REPO_URL}"
+                    echo ""
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: params.BRANCH]],
+                        userRemoteConfigs: [[
+                            url: "${env.REPO_URL}",
+                            credentialsId: "${env.CREDENTIALS_ID}"
+                        ]]
+                    ])
                 }
             }
         }
