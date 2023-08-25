@@ -30,8 +30,7 @@ pipeline {
                     // Build node application Docker image in node-application directory
                     dir('node-application') {
                         echo "Building Docker image"
-                        sh 'ls -ltr'
-                        sh 'docker build -t ${env.DOCKER_IMAGE}:latest -t ${env.DOCKER_IMAGE}:${BUILD_ID} .'
+                        sh "docker build -t ${env.DOCKER_IMAGE}:latest -t ${env.DOCKER_IMAGE}:${BUILD_ID} ."
                     }
                 }
             }
