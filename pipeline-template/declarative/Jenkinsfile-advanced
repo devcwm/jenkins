@@ -1,0 +1,166 @@
+pipeline {
+    agent {                                 // Either use `any` or select agent using label via block
+        label 'agent-label1, agent-label2, ..' // Add one or more lablel to select agent to run Job on
+    }
+    environment {
+        VAR_1   = 'Value'                   // Variables defined here can be used throughout pipeline
+        VAR_2   = 'Value'
+    }
+    options {                               // Used to configure various global options for the pipeline
+        buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '5'))  // Configures how build artifacts are retained or discarded over time
+        disableConcurrentBuilds()           // Disables concurrent builds of the same pipeline
+        skipDefaultCheckout()               // If you have a custom checkout step in your pipeline, using this option ensures that Jenkins doesn't perform an additional automatic checkout
+        timestamps()                        // Add timestamps to console output
+        timeout(time: 1, unit: 'HOURS')     // Set a timeout for the entire pipeline
+        retry(3)                            // Retry the entire pipeline up to 3 times on failure
+        disableResume()                     // Disable resuming of pipeline after a restart
+        quietPeriod(5)                      // Set a quiet period before starting the pipeline
+        lock(resource: 'my-lock')           // Acquire a lock before starting the pipeline
+        overrideIndexTriggers(true)         // Override any index triggers
+        overrideIndexCheckpoints(true)      // Override any index checkpoints
+        overrideIndexBuildNow(true)         // Override the "Build Now" feature
+        preserveStashes()                   // Preserve stashes even after the build completes
+        skipStagesAfterUnstable()           // Skip remaining stages if the pipeline becomes unstable
+        disableResume()                     // Disable resuming the pipeline after a restart
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '15')) // Discard artifacts after 15 days
+        ansiColor('xterm')                  // Enable ANSI color support in console output
+        overrideIndexTriggers(true)         // Override the index triggers
+        disableResume()                     // Disable resuming of the pipeline after a restart
+    }
+    triggers {
+        cron('@daily')                      // Cron-based trigger
+        pollSCM('* * * * *')                // Polling the SCM for changes
+        upstream(upstreamProjects: 'upstream-job', threshold: hudson.model.Result.SUCCESS) // Trigger on successful upstream build
+        githubPush()                        // GitHub push event
+        gitlabPush()                        // GitLab push event
+        bitbucketPush()                     // Bitbucket push event
+        githubWebhook(webhookUrl: 'https://your-webhook-url')  // Custom GitHub webhook
+        schedule('* * * * *')               // Scheduled trigger (cron expression)
+        parameters([
+            string(name: 'PARAM_ONE', defaultValue: 'default-value', description: 'Parameter description'),
+            choice(name: 'PARAM_TWO', choices: ['option1', 'option2', 'option3'], description: 'Select an option')
+        ])                                  // Trigger with parameters
+        remoteSCM('https://remote-repo.git') // Trigger on remote SCM changes
+        tag('release-tag')                  // Trigger on a specific SCM tag
+        branches('main', 'develop')         // Trigger on changes to specific branches
+        pullRequest()                       // Trigger on pull request event
+        githubPullRequest(                  // GitHub pull request event
+            events: [ 'opened', 'reopened', 'synchronize' ],
+            sourceBranchRegex: 'feature/.*'
+        )
+        gitlabMergeRequest(sourceBranchRegex: 'feature/.*')  // GitLab merge request event
+    }
+    parameters {                            // used to define input parameters that allow you to provide values when triggering the pipeline
+        string(name: 'STRING_PARAM', defaultValue: 'default-value', description: 'String parameter')
+        booleanParam(name: 'BOOLEAN_PARAM', defaultValue: true, description: 'Boolean parameter')
+        choice(name: 'CHOICE_PARAM', choices: ['option1', 'option2', 'option3'], description: 'Choice parameter')
+        password(name: 'PASSWORD_PARAM', defaultValue: 'secret', description: 'Password parameter')
+        text(name: 'TEXT_PARAM', defaultValue: 'multi-line\ntext', description: 'Text parameter')
+        file(name: 'FILE_PARAM', description: 'File parameter')
+        run(name: 'RUN_PARAM', description: 'Run parameter', project: 'other-job')
+        node(name: 'NODE_PARAM', description: 'Node parameter')
+        label(name: 'LABEL_PARAM', description: 'Label parameter', defaultValue: 'linux')
+        dynamic(name: 'DYNAMIC_PARAM', description: 'Dynamic parameter', script: [
+            classpath: [], 
+            script: [
+                'return ["value1", "value2", "value3"]'
+            ]
+        ])
+    }
+    stages {
+        stage('Checkout') {
+            agent any // Run on any available agent
+            options {
+                skipDefaultCheckout() // Skip the default SCM checkout for this stage
+            }
+            steps {
+                checkout scm // Perform the SCM checkout
+            }
+        }
+        stage('Build') {
+            when {
+                expression { params.BUILD_FLAG == 'true' } // Run this stage conditionally based on a parameter
+            }
+            agent {
+                label 'my-agent' // Run on a specific agent labeled 'my-agent'
+            }
+            steps {
+                sh 'echo "Building..."'
+            }
+        }
+        stage('Test') {
+            parallel {
+                stage('Unit Tests') {
+                    agent any // Run on any available agent
+                    steps {
+                        sh 'echo "Running unit tests..."'
+                    }
+                }
+                stage('Integration Tests') {
+                    agent any // Run on any available agent
+                    steps {
+                        sh 'echo "Running integration tests..."'
+                    }
+                }
+            }
+        }
+        stage('Deploy') {
+            agent {
+                docker 'my-docker-image' // Run inside a Docker container
+            }
+            steps {
+                sh 'echo "Deploying..."'
+            }
+            post {
+                always {
+                    echo 'Deployment completed'
+                }
+                success {
+                    slackSend(color: '#00FF00', message: "Deployment succeeded!")
+                }
+                failure {
+                    slackSend(color: '#FF0000', message: "Deployment failed!")
+                }
+            }
+        }
+    }
+    post {                                  // Used for running post stages actions
+        always {
+            echo "This will always run"
+        }
+        success {
+            echo "This will run on successful build"
+        }
+        unstable {
+            echo "This will run on unstable build"
+        }
+        failure {
+            echo "This will run on build failure"
+        }
+        changed {
+            echo "This will run when the build result changes"
+        }
+        fixed {
+            echo "This will run when the build result changes from failure to success"
+        }
+        regression {
+            echo "This will run when the build result changes from success to failure"
+        }
+        aborted {
+            echo "This will run when the build is manually aborted"
+        }
+        failureOrAbort {
+            echo "This will run on failure or manual abort"
+        }
+        cleanup {
+            echo "This will run after all other post-build steps"
+        }
+        script {
+            echo "This will run custom Groovy script"
+        }
+        junit '**/target/test-reports/*.xml' // Publish JUnit test results
+        archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true // Archive build artifacts
+        mail to: 'team@example.com', subject: 'Pipeline Status', body: 'Build completed!' // Send email notifications
+        slackSend(color: '#0000FF', message: "Pipeline finished!") // Send Slack notifications
+    }
+}
