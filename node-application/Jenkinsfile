@@ -24,8 +24,9 @@ pipeline {
         }
         stage('Build') {
             steps {
-                // Your build steps here
-                echo "Hello"
+                // Budild node application
+                echo "Building Dockerfile"
+                docker build -t hello-world-node-app .
             }
         }
         stage('Test') {
