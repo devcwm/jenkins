@@ -28,7 +28,7 @@ pipeline {
                     dir('node-application') {
                         echo "Building Docker image"
                         sh 'ls -ltr'
-                        sh 'docker build -t hello-world-node-app node-applciation/'
+                        sh 'docker build -t hello-world-node-app .'
                     }
                 }
             }
