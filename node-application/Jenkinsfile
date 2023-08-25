@@ -42,7 +42,7 @@ pipeline {
                     sh 'docker run -d -p 3000:3000 hello-world-node-app'
                     
                     // Wait a few seconds to allow the container to start
-                    sleep(time: 10, unit: 'SECONDS')
+                    sleep(time: 5, unit: 'SECONDS')
                     
                     // Use curl to fetch the response from the container
                     def response = sh(script: 'curl -s http://localhost:3000/', returnStdout: true).trim()
@@ -61,9 +61,9 @@ pipeline {
                 // Push docker file to 
                 echo "Push docker build to repository"
                 echo "${env.DOCKER_REGISTRY_URL}"
-                sh 'docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_HUB_TOKEN} ${env.DOCKER_REGISTRY_URL}'
-                sh 'docker push devcwm/node-application:${BUILD_ID}'
-                sh 'docker rm $(docker ps -aq)'
+                sh "docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_HUB_TOKEN} ${env.DOCKER_REGISTRY_URL}"
+                sh "docker push devcwm/node-application:${BUILD_ID}"
+                sh "docker rm $(docker ps -aq)"
             }
         }
     }
