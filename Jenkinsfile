@@ -11,16 +11,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: [
-                            name: params.BRANCH
-                        ],
-                        userRemoteConfigs: [
-                            url: env.REPO_URL,
-                            credentialsId: env.CREDENTIALS_ID
-                        ]
-                    ])
+                    echo env.REPO_URL
                 }
             }
         }
