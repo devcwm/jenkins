@@ -51,10 +51,6 @@ pipeline {
                     
                     // Assert that the response matches the expected output
                     assert response == 'Hello, World!'
-                    
-                    // Stop the container
-                    sh 'docker stop $(docker ps -q)'
-                    
                 }
             }
         }
@@ -66,14 +62,23 @@ pipeline {
                 sh "docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_HUB_TOKEN} ${env.DOCKER_REGISTRY_URL}"
                 sh "docker push ${env.DOCKER_IMAGE}:${BUILD_ID}"
                 sh "docker push ${env.DOCKER_IMAGE}:latest"
-                sh 'docker rm $(docker ps -aq)'
             }
         }
     }
     post {
-        always {
-            // Post-build actions
-            echo "Hello"
+        success {
+            echo "Build finished successfully!"
+        }
+        failure {
+            echo "Build had failed! Check logs."
+        }
+        cleanup {
+            script {
+                echo "Cleanup Docker Images"
+                // Stop and remove the container
+                sh 'docker stop $(docker ps -q)'
+                sh 'docker rm $(docker ps -aq)'
+            }
         }
     }
 }
