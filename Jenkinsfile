@@ -11,7 +11,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    echo env.REPO_URL
+                    echo "${REPO_URL}"
                 }
             }
         }
