@@ -10,14 +10,17 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: params.BRANCH]],
-                        userRemoteConfigs: [[
-                            url: env.REPO_URL,
-                            credentialsId: env.CREDENTIALS_ID
-                        ]]
-                    ])
+                    def checkoutDir = 'node-application'
+                    dir(checkoutDir) {
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: [[name: params.BRANCH]],
+                            userRemoteConfigs: [[
+                                url: env.REPO_URL,
+                                credentialsId: env.CREDENTIALS_ID
+                            ]]
+                        ])
+                    }
                 }
             }
         }
