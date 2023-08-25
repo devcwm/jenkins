@@ -28,7 +28,7 @@ pipeline {
                     dir('node-application') {
                         echo "Building Docker image"
                         sh 'ls -ltr'
-                        sh 'docker build -t hello-world-node-app:latest -t hello-world-node-app:${BUILD_ID} .'
+                        sh 'docker build -t devcwm/hello-world-node-app:latest -t devcwm/hello-world-node-app:${BUILD_ID} .'
                     }
                 }
             }
@@ -39,7 +39,7 @@ pipeline {
                     echo "Testing Docker image"
                     
                     // Run the Docker container
-                    sh 'docker run -d -p 3000:3000 hello-world-node-app'
+                    sh 'docker run -d -p 3000:3000 devcwm/hello-world-node-app:latest'
                     
                     // Wait a few seconds to allow the container to start
                     sleep(time: 5, unit: 'SECONDS')
@@ -63,6 +63,7 @@ pipeline {
                 echo "${env.DOCKER_REGISTRY_URL}"
                 sh "docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_HUB_TOKEN} ${env.DOCKER_REGISTRY_URL}"
                 sh "docker push devcwm/node-application:${BUILD_ID}"
+                sh "docker push devcwm/node-application:latest"
                 sh 'docker rm $(docker ps -aq)'
             }
         }
