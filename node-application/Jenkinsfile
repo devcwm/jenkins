@@ -24,10 +24,12 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    // Build node application Docker image
-                    echo "Building Docker image"
-                    sh 'ls -ltr'
-                    sh 'docker build -t hello-world-node-app node-applciation/'
+                    // Build node application Docker image in node-application directory
+                    dir('node-application') {
+                        echo "Building Docker image"
+                        sh 'ls -ltr'
+                        sh 'docker build -t hello-world-node-app node-applciation/'
+                    }
                 }
             }
         }
