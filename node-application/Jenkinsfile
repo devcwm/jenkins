@@ -28,7 +28,7 @@ pipeline {
                     dir('node-application') {
                         echo "Building Docker image"
                         sh 'ls -ltr'
-                        sh 'docker build -t hello-world-node-app .'
+                        sh 'docker build -t hello-world-node-app:latest -t hello-world-node-app:${BUILD_ID} .'
                     }
                 }
             }
@@ -50,16 +50,19 @@ pipeline {
                     // Assert that the response matches the expected output
                     assert response == 'Hello, World!'
                     
-                    // Stop and remove the container
+                    // Stop the container
                     sh 'docker stop $(docker ps -q)'
-                    sh 'docker rm $(docker ps -aq)'
+                    
                 }
             }
         }
         stage('Deploy') {
             steps {
-                // Your deployment steps here
-                echo "Hello"
+                // Push docker file to 
+                echo "Push docker build to repository"
+                sh 'docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_HUB_TOKEN} ${env.DOCKER_REGISTRY_URL}'
+                sh 'docker push devcwm/node-application:${BUILD_ID}'
+                sh 'docker rm $(docker ps -aq)'
             }
         }
     }
