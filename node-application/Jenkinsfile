@@ -24,6 +24,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
+                    ls -ltr
                     // Build node application Docker image
                     echo "Building Docker image"
                     sh 'docker build -t hello-world-node-app node-applciation/'
@@ -32,6 +33,7 @@ pipeline {
         }
         stage('Test') {
             steps {
+                ls -ltr
                 // Your test steps here
                 echo "Hello"
             }
