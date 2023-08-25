@@ -10,17 +10,14 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    def checkoutDir = 'node-application'
-                    dir(checkoutDir) {
-                        checkout([
-                            $class: 'GitSCM',
-                            branches: [[name: params.BRANCH]],
-                            userRemoteConfigs: [[
-                                url: env.REPO_URL,
-                                credentialsId: env.CREDENTIALS_ID
-                            ]]
-                        ])
-                    }
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: params.BRANCH]],
+                        userRemoteConfigs: [[
+                            url: env.REPO_URL,
+                            credentialsId: env.CREDENTIALS_ID
+                        ]]
+                    ])
                 }
             }
         }
@@ -29,7 +26,7 @@ pipeline {
                 script {
                     // Build node application Docker image
                     echo "Building Docker image"
-                    sh 'docker build -t hello-world-node-app .'
+                    sh 'docker build -t hello-world-node-app node-applciation/'
                 }
             }
         }
