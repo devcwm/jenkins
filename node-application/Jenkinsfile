@@ -35,8 +35,25 @@ pipeline {
         }
         stage('Test') {
             steps {
-                // Your test steps here
-                echo "Hello"
+                script {
+                    echo "Testing Docker image"
+                    
+                    // Run the Docker container
+                    sh 'docker run -d -p 3000:3000 hello-world-node-app'
+                    
+                    // Wait a few seconds to allow the container to start
+                    sleep(time: 10, unit: 'SECONDS')
+                    
+                    // Use curl to fetch the response from the container
+                    def response = sh(script: 'curl -s http://localhost:3000/', returnStdout: true).trim()
+                    
+                    // Assert that the response matches the expected output
+                    assert response == 'Hello, World!'
+                    
+                    // Stop and remove the container
+                    sh 'docker stop $(docker ps -q)'
+                    sh 'docker rm $(docker ps -aq)'
+                }
             }
         }
         stage('Deploy') {
