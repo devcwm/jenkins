@@ -4,67 +4,65 @@ pipeline {
         string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to checkout')
     }
     options {
-        skipDefaultCheckout() 
+        skipDefaultCheckout()
     }
     environment {
         DOCKER_IMAGE = 'devcwm/node-application'
     }
+    
     stages {
         stage('Checkout') {
             steps {
-                script {
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: params.BRANCH]],
-                        userRemoteConfigs: [[
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [
+                        [$class: 'BranchSpec', name: params.BRANCH]
+                    ],
+                    userRemoteConfigs: [
+                        [
                             url: env.REPO_URL,
                             credentialsId: env.CREDENTIALS_ID
-                        ]]
-                    ])
-                }
+                        ]
+                    ]
+                ])
             }
         }
+        
         stage('Build') {
             steps {
-                script {
-                    // Build node application Docker image in node-application directory
-                    dir('node-application') {
-                        echo "Building Docker image"
-                        sh "docker build -t ${env.DOCKER_IMAGE}:latest -t ${env.DOCKER_IMAGE}:${BUILD_ID} ."
-                    }
+                dir('node-application') {
+                    echo "Building Docker image"
+                    sh "docker build -t ${DOCKER_IMAGE}:latest -t ${DOCKER_IMAGE}:${BUILD_ID} ."
                 }
             }
         }
+        
         stage('Test') {
             steps {
+                echo "Testing Docker image"
+                
+                sh "docker run -d -p 3000:3000 ${DOCKER_IMAGE}:latest"
+                sleep(time: 5, unit: 'SECONDS')
+                
                 script {
-                    echo "Testing Docker image"
-                    
-                    // Run the Docker container
-                    sh "docker run -d -p 3000:3000 ${env.DOCKER_IMAGE}:latest"
-                    
-                    // Wait a few seconds to allow the container to start
-                    sleep(time: 5, unit: 'SECONDS')
-                    
-                    // Use curl to fetch the response from the container
                     def response = sh(script: 'curl -s http://localhost:3000/', returnStdout: true).trim()
-                    
-                    // Assert that the response matches the expected output
                     assert response == 'Hello, World!'
                 }
             }
         }
+        
         stage('Deploy') {
             steps {
-                // Push docker file to 
                 echo "Push docker build to repository"
                 echo "${env.DOCKER_REGISTRY_URL}"
+                
                 sh "docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_HUB_TOKEN} ${env.DOCKER_REGISTRY_URL}"
-                sh "docker push ${env.DOCKER_IMAGE}:${BUILD_ID}"
-                sh "docker push ${env.DOCKER_IMAGE}:latest"
+                sh "docker push ${DOCKER_IMAGE}:${BUILD_ID}"
+                sh "docker push ${DOCKER_IMAGE}:latest"
             }
         }
     }
+    
     post {
         success {
             echo "Build finished successfully!"
@@ -73,12 +71,9 @@ pipeline {
             echo "Build had failed! Check logs."
         }
         cleanup {
-            script {
-                echo "Cleanup Docker Images"
-                // Stop and remove the container
-                sh 'docker stop $(docker ps -q)'
-                sh 'docker rm $(docker ps -aq)'
-            }
+            echo "Cleanup Docker Images"
+            sh 'docker stop $(docker ps -q)'
+            sh 'docker rm $(docker ps -aq)'
         }
     }
 }
