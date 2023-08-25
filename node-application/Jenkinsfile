@@ -33,7 +33,6 @@ pipeline {
         }
         stage('Test') {
             steps {
-                ls -ltr
                 // Your test steps here
                 echo "Hello"
             }
