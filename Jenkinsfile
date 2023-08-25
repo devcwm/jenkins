@@ -1,9 +1,5 @@
 pipeline {
     agent any
-    environment {
-        REPO_URL = credentials('REPO_URL')
-        CREDENTIALS_ID = credentials('CREDENTIALS_ID')
-    }
     parameters {
         string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to checkout')
     }
