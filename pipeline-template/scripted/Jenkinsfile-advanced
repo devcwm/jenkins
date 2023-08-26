@@ -1,17 +1,29 @@
 def targetLabel = 'label-3'
 node('label-1 || label-2 || label: targetLabel') {
+    // Change user for the node
     changeUser('username')
+
+    // Define a custom workspace directory
     workspace('/custom/workspace/directory')
+
+    // Allocate two executors (build agents) for this build
     numExecutors 2
+
+    // Allocate a specific executor (agent) for this build
     allocateExecutor('specific-agent')
 
+    // Print the node name where the pipeline is running
     echo "Running on node: ${NODE_NAME}"
+
+    // Get the node name where the build is running
     def nodeName = currentBuild.getBuiltOn()
     if (nodeName == 'linux') {
         sh 'echo "Running on label-1 node"'
     } else if (nodeName == 'windows') {
         bat 'echo "Running on label-2 node"'
     }
+
+    // Access the Computer object for the node
     def computer = Computer.currentComputer()
     def node = computer.node
     echo "Node name: ${node.nodeName}"

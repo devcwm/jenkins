@@ -30,4 +30,12 @@ node {
     }
     
     // End of the pipeline script
+    post {
+        success {
+            echo "Build finished successfully!"
+        }
+        failure {
+            echo "Build had failed! Check logs."
+        }
+    }
 }

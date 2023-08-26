@@ -1,6 +1,21 @@
 pipeline {
     agent {                                 // Either use `any` or select agent using label via block
         label 'agent-label1, agent-label2, ..' // Add one or more lablel to select agent to run Job on
+        customWorkspace '/some/other/path'  // custom workspace path if you don't want to use default one
+        docker {                            // Alternatively run agent from docker registry
+            image 'myregistry.com/node'
+            label 'my-defined-label'
+            registryUrl 'https://myregistry.com/'
+            registryCredentialsId 'myPredefinedCredentialsInJenkins'
+        }
+
+        dockerfile {                        // Alternatively run agent built from Dockerfile
+            filename 'Dockerfile.build'
+            dir 'build'
+            label 'my-defined-label'
+            additionalBuildArgs  '--build-arg version=1.0.2'
+            args '-v /tmp:/tmp'
+        }
     }
     environment {
         VAR_1   = 'Value'                   // Variables defined here can be used throughout pipeline
