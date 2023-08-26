@@ -12,6 +12,10 @@ The primary difference between scripted and declarative pipelines in Jenkins lie
 
 ## Declarative Pipeline:
 
+* Default Checkout: By Default declarative pipeline has very first stage as checkout
+
+* Options: DEclarative has extra options like Git Build Data and Restart from Stage
+
 * Declarative Syntax: Declarative pipelines use a more structured and human-readable syntax. It's designed to be simpler and more approachable, especially for those new to Jenkins or CI/CD.
 
 * Opinionated Structure: Declarative pipelines follow a predefined structure and enforce a specific set of steps, which makes the pipeline code easier to read, write, and maintain. It's well-suited for standard CI/CD patterns.
@@ -27,3 +31,7 @@ The choice between scripted and declarative pipelines depends on your project's 
 # Difference betweek Scripted and Declarative pipelines
 
 Link - https://www.youtube.com/watch?v=GJBlskiaRrI
+
+# Run shell scripts
+
+Link - https://www.youtube.com/watch?v=mbeQWBNaNKQ&t=6s
