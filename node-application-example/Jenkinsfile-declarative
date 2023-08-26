@@ -30,7 +30,7 @@ pipeline {
         
         stage('Build') {
             steps {
-                dir('node-application') {
+                dir('node-application-example') {
                     echo "Building Docker image"
                     sh "docker build -t ${DOCKER_IMAGE}:latest -t ${DOCKER_IMAGE}:${BUILD_ID} ."
                 }
