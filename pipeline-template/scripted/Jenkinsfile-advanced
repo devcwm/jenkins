@@ -1,0 +1,116 @@
+def targetLabel = 'label-3'
+node('label-1 || label-2 || label: targetLabel') {
+    changeUser('username')
+    workspace('/custom/workspace/directory')
+    numExecutors 2
+    allocateExecutor('specific-agent')
+
+    echo "Running on node: ${NODE_NAME}"
+    def nodeName = currentBuild.getBuiltOn()
+    if (nodeName == 'linux') {
+        sh 'echo "Running on label-1 node"'
+    } else if (nodeName == 'windows') {
+        bat 'echo "Running on label-2 node"'
+    }
+    def computer = Computer.currentComputer()
+    def node = computer.node
+    echo "Node name: ${node.nodeName}"
+
+    // Environment section
+    def MY_VARIABLE = 'Hello'
+    def MY_VARIABLE2 = 'Hello2'
+
+    // Stage 1: Checkout Code
+    stage('Checkout') {
+        echo "Checking out code from Git repository"
+        checkout([$class: 'GitSCM', branches: [[name: 'main']], userRemoteConfigs: [[url: 'https://github.com/yourusername/yourrepo.git']]])
+    }
+    
+    // Stage 2: Build Docker Image
+    stage('Build') {
+        echo "Building Docker image"
+        dir('node-application') {
+            sh "docker build -t my-node-app ."
+        }
+    }
+    
+    // Stage 3: Run Docker Container
+    stage('Run') {
+        echo "Running Docker container"
+        sh "docker run -d -p 3000:3000 my-node-app"
+    }
+    
+    // Stage 4: Cleanup
+    stage('Cleanup') {
+        echo "Cleaning up Docker containers"
+        sh 'docker stop $(docker ps -q)'
+        sh 'docker rm $(docker ps -aq)'
+    }
+
+    // Extra groovy concepts
+    stage('Conditional Stage') {
+        echo "Executing conditional stage"
+        if (someCondition) {
+            echo "This stage runs when the condition is true"
+        }
+    }
+
+    // You can use for and while loop
+    stage('Looping Stage') {
+        echo "Executing looping stage"
+        for (int i = 0; i < 5; i++) {
+            echo "Iteration ${i}"
+        }
+    }
+
+    // handle exceptions
+    stage('Error Handling Stage') {
+        echo "Executing error handling stage"
+        try {
+            sh 'some-command-that-might-fail'
+        } catch (Exception e) {
+            echo "An error occurred: ${e.message}"
+        }
+    }
+
+    // stage('Parallel Stage') {
+    stage('Parallel Stage') {
+        echo "Executing parallel stage"
+        parallel(
+            "Branch A": {
+                echo "Running in parallel - Branch A"
+            },
+            "Branch B": {
+                echo "Running in parallel - Branch B"
+            }
+        )
+    }
+
+    // define methods/functions for complex steps
+    def myCustomStep() {
+        echo "Executing custom step"
+        // Custom logic here
+    }
+
+    stage('Custom Stage') {
+        echo "Executing custom stage"
+        myCustomStep()
+    }
+
+    // manipulate environment variables within a stage.
+    stage('Environment Stage') {
+        echo "Executing environment stage"
+        env.MY_VARIABLE = 'new_value'
+        echo "Environment variable: ${env.MY_VARIABLE}"
+    }
+
+    // End of the pipeline script
+    post {
+        success {
+            echo "Build finished successfully!"
+        }
+        failure {
+            echo "Build had failed! Check logs."
+        }
+    }
+}
