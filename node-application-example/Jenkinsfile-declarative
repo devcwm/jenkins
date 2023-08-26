@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent docker-agent
     parameters {
         string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to checkout')
     }
