@@ -2,7 +2,7 @@ node ('docker-agent') {
     // Define a custom lock for the entire pipeline
     def myLock = 'pipeline-lock'
     
-    lock(mylock){
+    lock(myLock){
         try {
             // Read parameters
             def branchName = input(message: 'Branch NAME:', parameters: [string(defaultValue: 'main', description: 'Enter git branch here', name: 'BRANCH_NAME')])
