@@ -60,6 +60,8 @@ node ('docker-agent') {
         
     } catch(Exception e) {
         echo "Build had failed! Check logs."
+        error("Build failed due to an exception.")
+
     } finally {
         echo "Cleanup Docker Images"
         sh 'docker stop $(docker ps -q)'
