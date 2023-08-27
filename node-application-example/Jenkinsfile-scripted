@@ -1,12 +1,15 @@
 node ('docker-agent') {
-    // Start of the pipeline script
     
-    // Stage 1: Checkout Code
+    stage('User Input') {
+        // Prompt the user for input and store the result in the 'branchName' variable
+        def branchName = input(message: 'Branch NAME:', parameters: [string(defaultValue: 'main', description: 'Enter git branch here', name: 'BRANCH_NAME')])
+    }
+ 
     stage('Checkout') {
         checkout([
             $class: 'GitSCM',
             branches: [
-                [$class: 'BranchSpec', name: params.BRANCH]
+                [$class: 'BranchSpec', name: branchName]  // Use the collected branchName
             ],
             userRemoteConfigs: [
                 [
