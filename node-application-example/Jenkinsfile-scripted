@@ -7,6 +7,7 @@ node ('docker-agent') {
         // Environment section
         def DOCKER_IMAGE = 'devcwm/node-application'
 
+        // Checkout code
         stage('Checkout') {
             checkout([
                 $class: 'GitSCM',
@@ -22,7 +23,7 @@ node ('docker-agent') {
             ])
         }
 
-        // Stage 2: Build Docker Image
+        // Build Docker Image
         stage('Build') {
             // Steps for the Build stage
             dir('node-application-example') {
@@ -31,16 +32,25 @@ node ('docker-agent') {
             }
         }
         
-        // Stage 3: Run Docker Container
+        // Run Docker Container
         stage('Run') {
             // Steps for the Run stage
-            echo "Stage 2"
+            echo "Testing Docker image"
+            sh "docker run -d -p 3000:3000 ${DOCKER_IMAGE}:latest"
+            sleep(time: 5, unit: 'SECONDS')
+            def response = sh(script: 'curl -s http://localhost:3000/', returnStdout: true).trim()
+            assert response == 'Hello, World!'
         }
         
-        // Stage 4: Cleanup
+        // Cleanup
         stage('Cleanup') {
             // Steps for the Cleanup stage
-            echo "Stage 3"
+            echo "Push docker build to repository"
+            echo "${env.DOCKER_REGISTRY_URL}"
+            
+            sh "docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_HUB_TOKEN} ${env.DOCKER_REGISTRY_URL}"
+            sh "docker push ${DOCKER_IMAGE}:${BUILD_ID}"
+            sh "docker push ${DOCKER_IMAGE}:latest"
         }
 
         echo 'Build successfully finished'
@@ -48,5 +58,5 @@ node ('docker-agent') {
     } catch(Exception e) {
         echo "Build had failed! Check logs."
     }
-        
+
 }
