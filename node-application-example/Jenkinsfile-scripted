@@ -1,9 +1,6 @@
 node ('docker-agent') {
     
-    stage('User Input') {
-        // Prompt the user for input and store the result in the 'branchName' variable
-        def branchName = input(message: 'Branch NAME:', parameters: [string(defaultValue: 'main', description: 'Enter git branch here', name: 'BRANCH_NAME')])
-    }
+    def branchName = input(message: 'Branch NAME:', parameters: [string(defaultValue: 'main', description: 'Enter git branch here', name: 'BRANCH_NAME')])
  
     stage('Checkout') {
         checkout([
