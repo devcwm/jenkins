@@ -56,9 +56,14 @@ node ('docker-agent') {
         stage('')
 
         echo 'Build successfully finished'
-
+        
+        
     } catch(Exception e) {
         echo "Build had failed! Check logs."
+    } finally {
+        echo "Cleanup Docker Images"
+        sh 'docker stop $(docker ps -q)'
+        sh 'docker rm $(docker ps -aq)'
     }
 
 }
