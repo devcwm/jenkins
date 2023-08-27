@@ -1,74 +1,69 @@
 node ('docker-agent') {
-    // Define a custom lock for the entire pipeline
-    def myLock = 'pipeline-lock'
+    try {
+        // Read parameters
+        def branchName = input(message: 'Branch NAME:', parameters: [string(defaultValue: 'main', description: 'Enter git branch here', name: 'BRANCH_NAME')])
     
-    lock(myLock){
-        try {
-            // Read parameters
-            def branchName = input(message: 'Branch NAME:', parameters: [string(defaultValue: 'main', description: 'Enter git branch here', name: 'BRANCH_NAME')])
-        
-            // Environment section
-            def DOCKER_IMAGE = 'devcwm/node-application'
+        // Environment section
+        def DOCKER_IMAGE = 'devcwm/node-application'
 
-            // Checkout code
-            stage('Checkout') {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [
-                        [$class: 'BranchSpec', name: branchName]  // Use the collected branchName
-                    ],
-                    userRemoteConfigs: [
-                        [
-                            url: env.REPO_URL,
-                            credentialsId: env.CREDENTIALS_ID
-                        ]
+        // Checkout code
+        stage('Checkout') {
+            checkout([
+                $class: 'GitSCM',
+                branches: [
+                    [$class: 'BranchSpec', name: branchName]  // Use the collected branchName
+                ],
+                userRemoteConfigs: [
+                    [
+                        url: env.REPO_URL,
+                        credentialsId: env.CREDENTIALS_ID
                     ]
-                ])
-            }
-
-            // Build Docker Image
-            stage('Build') {
-                // Steps for the Build stage
-                dir('node-application-example') {
-                    echo "Building Docker image"
-                    sh "docker build -t ${DOCKER_IMAGE}:latest -t ${DOCKER_IMAGE}:scripted-${BUILD_ID} ."
-                }
-            }
-            
-            // Run Docker Container
-            stage('Run') {
-                // Steps for the Run stage
-                echo "Testing Docker image"
-                sh "docker run -d -p 3000:3000 ${DOCKER_IMAGE}:latest"
-                sleep(time: 5, unit: 'SECONDS')
-                def response = sh(script: 'curl -s http://localhost:3000/', returnStdout: true).trim()
-                assert response == 'Hello, World!'
-            }
-            
-            // Cleanup
-            stage('Deploy') {
-                // Steps for the Cleanup stage
-                echo "Push docker build to repository"
-                echo "${env.DOCKER_REGISTRY_URL}"
-                
-                sh "docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_HUB_TOKEN} ${env.DOCKER_REGISTRY_URL}"
-                sh "docker push ${DOCKER_IMAGE}:scripted-${BUILD_ID}"
-                sh "docker push ${DOCKER_IMAGE}:scripted-latest"
-            }
-
-            stage('')
-
-            echo 'Build successfully finished'
-            
-            
-        } catch(Exception e) {
-            echo "Build had failed! Check logs."
-            error("Build failed due to an exception.")
-
-        } finally {
-            echo "Cleanup Docker Images"
-            sh 'docker stop $(docker ps -q)'
-            sh 'docker rm $(docker ps -aq)'
+                ]
+            ])
         }
+
+        // Build Docker Image
+        stage('Build') {
+            // Steps for the Build stage
+            dir('node-application-example') {
+                echo "Building Docker image"
+                sh "docker build -t ${DOCKER_IMAGE}:latest -t ${DOCKER_IMAGE}:scripted-${BUILD_ID} ."
+            }
+        }
+        
+        // Run Docker Container
+        stage('Run') {
+            // Steps for the Run stage
+            echo "Testing Docker image"
+            sh "docker run -d -p 3000:3000 ${DOCKER_IMAGE}:latest"
+            sleep(time: 5, unit: 'SECONDS')
+            def response = sh(script: 'curl -s http://localhost:3000/', returnStdout: true).trim()
+            assert response == 'Hello, World!'
+        }
+        
+        // Cleanup
+        stage('Deploy') {
+            // Steps for the Cleanup stage
+            echo "Push docker build to repository"
+            echo "${env.DOCKER_REGISTRY_URL}"
+            
+            sh "docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_HUB_TOKEN} ${env.DOCKER_REGISTRY_URL}"
+            sh "docker push ${DOCKER_IMAGE}:scripted-${BUILD_ID}"
+            sh "docker push ${DOCKER_IMAGE}:scripted-latest"
+        }
+
+        stage('')
+
+        echo 'Build successfully finished'
+        
+        
+    } catch(Exception e) {
+        echo "Build had failed! Check logs."
+        error("Build failed due to an exception.")
+
+    } finally {
+        echo "Cleanup Docker Images"
+        sh 'docker stop $(docker ps -q)'
+        sh 'docker rm $(docker ps -aq)'
     }
 }
