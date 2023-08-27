@@ -15,4 +15,4 @@ If you are looking for Pipeline teampltes then head over to `pipeline-template` 
 
 
 
-Feel free to create a `Pull Request` if you want to contribute to this repository, correct documentation or piplines templates.
+Feel free to create a `Pull Request` if you want to contribute to this repository, correct documentation or update piplines templates.
