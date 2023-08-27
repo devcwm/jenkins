@@ -5,7 +5,7 @@ This is a more opinionated and concise way of defining pipelines using a structu
 
 # How to setup Jenkinsfile templates?
 
-Review both `Jenkinsfile-simplified` and `Jenkinsfile-advanced`. It's advisible to start with simplified template if you are starting up with Jenkins pipeline.
+Review both `Jenkinsfile-starter` and `Jenkinsfile-advanced`. It's advisible to start with starter template if you are starting up with Jenkins pipeline.
 
 If you have far amount of prior experience with Jenkins pipeline setup previously, start with `Jenkinsfile-advanced` template. 
 
