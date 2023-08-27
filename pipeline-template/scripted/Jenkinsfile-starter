@@ -1,6 +1,4 @@
 node {
-    // Start of the pipeline script
-    
     // Stage 1: Checkout Code
     stage('Checkout') {
         // Steps for the Checkout stage
@@ -28,14 +26,5 @@ node {
         sh 'docker stop $(docker ps -q)'
         sh 'docker rm $(docker ps -aq)'
     }
-    
-    // End of the pipeline script
-    post {
-        success {
-            echo "Build finished successfully!"
-        }
-        failure {
-            echo "Build had failed! Check logs."
-        }
-    }
+
 }
