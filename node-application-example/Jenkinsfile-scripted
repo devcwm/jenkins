@@ -51,9 +51,7 @@ node ('docker-agent') {
             sh "docker push ${DOCKER_IMAGE}:scripted-${BUILD_ID}"
             sh "docker push ${DOCKER_IMAGE}:scripted-latest"
         }
-
-        stage('')
-
+        
         echo 'Build successfully finished'
         
         
