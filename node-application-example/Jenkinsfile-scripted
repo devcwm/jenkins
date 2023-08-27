@@ -27,7 +27,7 @@ node ('docker-agent') {
             // Steps for the Build stage
             dir('node-application-example') {
                 echo "Building Docker image"
-                sh "docker build -t ${DOCKER_IMAGE}:latest -t ${DOCKER_IMAGE}:scripted-${BUILD_ID} ."
+                sh "docker build -t ${DOCKER_IMAGE}:scripted-latest -t ${DOCKER_IMAGE}:scripted-${BUILD_ID} ."
             }
         }
         
